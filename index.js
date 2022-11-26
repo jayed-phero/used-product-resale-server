@@ -25,8 +25,8 @@ async function run() {
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email
             const user = req.body
-            const filter = {email: email}
-            const options = {upsert: true}
+            const filter = { email: email }
+            const options = { upsert: true }
             const updateDoc = {
                 $set: user,
             }
@@ -35,17 +35,17 @@ async function run() {
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '11d'
             })
-            res.send({result, token})
+            res.send({ result, token })
 
         })
 
 
-         // product  advertise 
-         app.put('/allproducts/:role', async (req, res) => {
+        // product  advertise 
+        app.put('/allproducts/:role', async (req, res) => {
             const role = req.params.role
             const product = req.body
-            const filter = { role: role}
-            const options = {upsert: true}
+            const filter = { role: role }
+            const options = { upsert: true }
             const updateDoc = {
                 $set: product,
             }
@@ -57,7 +57,7 @@ async function run() {
         // get a single user with role
         app.get('/user/:email', async (req, res) => {
             const email = req.params.email
-            const query = {email: email}
+            const query = { email: email }
             const user = await usersCollection.findOne(query)
             // console.log(user.role)
             res.send(user)
@@ -79,7 +79,7 @@ async function run() {
 
         // booking by user
         app.post('/bookings', async (req, res) => {
-            const bookingData = req.body 
+            const bookingData = req.body
             const result = await bookingsCollection.insertOne(bookingData)
             res.send(result)
         })
@@ -87,11 +87,11 @@ async function run() {
         // get all bookings by cusotomer 
         app.get('/allbookings', async (req, res) => {
             let query = {}
-            const email = req.query.email 
+            const email = req.query.email
 
-            if(email) {
+            if (email) {
                 query = {
-                    email: email 
+                    email: email
                 }
             }
 
@@ -100,22 +100,22 @@ async function run() {
         })
 
 
-          // add a product by seller
-          app.post('/addproduct', async (req, res) => {
-            const addProductData = req.body 
+        // add a product by seller
+        app.post('/addproduct', async (req, res) => {
+            const addProductData = req.body
             const result = await productsCollection.insertOne(addProductData)
             res.send(result)
         })
 
 
-          // get all product for seller 
-          app.get('/allproducts', async (req, res) => {
+        // get all product for seller 
+        app.get('/allproducts', async (req, res) => {
             let query = {}
-            const email = req.query.email 
+            const email = req.query.email
 
-            if(email) {
+            if (email) {
                 query = {
-                    email: email 
+                    email: email
                 }
             }
 
@@ -123,7 +123,14 @@ async function run() {
             res.send(products)
         })
 
-        // product advertse update role
+
+        // product delete
+        app.delete('/allproducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(filter)
+            res.send(result)
+        })
 
 
 
