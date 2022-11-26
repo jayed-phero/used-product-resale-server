@@ -40,6 +40,20 @@ async function run() {
         })
 
 
+         // product  advertise 
+         app.put('/allproducts/:role', async (req, res) => {
+            const role = req.params.role
+            const product = req.body
+            const filter = { role: role}
+            const options = {upsert: true}
+            const updateDoc = {
+                $set: product,
+            }
+            const result = await productsCollection.updateOne(filter, updateDoc, options)
+            res.send(result)
+        })
+
+
         // get a single user with role
         app.get('/user/:email', async (req, res) => {
             const email = req.params.email
@@ -109,6 +123,9 @@ async function run() {
             res.send(products)
         })
 
+        // product advertse update role
+
+
 
 
 
@@ -131,5 +148,12 @@ app.listen(port, () => {
     console.log(`Resel product server is running ${port}`)
 })
 
+// echo "# b612-used-products-resale-server-side-jayed-phero" >> README.md
+// git init
+// git add README.md
+// git commit -m "first commit"
+// git branch -M main
+// git remote add origin https://github.com/programming-hero-web-course-4/b612-used-products-resale-server-side-jayed-phero.git
+// git push -u origin main
 
 
