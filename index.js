@@ -35,6 +35,7 @@ async function run() {
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '11d'
             })
+            console.log(token)
             res.send({ result, token })
 
         })
@@ -129,6 +130,35 @@ async function run() {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             const result = await productsCollection.deleteOne(filter)
+            res.send(result)
+        })
+
+         // get all seller for admin 
+         app.get('/allseller', async (req, res) => {
+            let query = {}
+            const role = req.query.role
+
+            if (role) {
+                query = {
+                    role: role
+                }
+            }
+
+            const sellers = await usersCollection.find(query).toArray()
+            res.send(sellers)
+        })
+
+
+        // verify seller
+        app.put('/allproducts/:role', async (req, res) => {
+            const role = req.params.role
+            const product = req.body
+            const filter = { role: role }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: product,
+            }
+            const result = await productsCollection.updateOne(filter, updateDoc, options)
             res.send(result)
         })
 
