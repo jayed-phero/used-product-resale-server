@@ -21,6 +21,8 @@ async function run() {
         const productsCollection = client.db('reselProducts').collection('products')
         const usersCollection = client.db('reselProducts').collection('users')
         const bookingsCollection = client.db('reselProducts').collection('customerBookings')
+        const paymentsCollection = client.db('reselProducts').collection('customerPayments')
+        const wishlistsCollection = client.db('reselProducts').collection('wishlistedProducts')
 
         // user saving with jwt token
         app.put('/user/:email', async (req, res) => {
@@ -84,6 +86,20 @@ async function run() {
             const bookingData = req.body
             const result = await bookingsCollection.insertOne(bookingData)
             res.send(result)
+        })
+
+
+        // wishlisted post by user
+        app.post('/wishlist', async (req, res) => {
+            const bookingData = req.body
+            const result = await wishlistsCollection.insertOne(bookingData)
+            res.send(result)
+        })
+
+        // Get all wishlisted products
+        app.get('/wishlistedproducts', async (req, res) => {
+            const wishlitedpro = await wishlistsCollection.find().toArray()
+            res.send(wishlitedpro)
         })
 
         // get all bookings by cusotomer 
@@ -179,12 +195,20 @@ async function run() {
             res.send(booking)
         })
 
+        // get wishlist payment info
+        app.get('/wishlists/:id', async (req, res) => {
+            const id = req.params.id 
+            const query = { _id: ObjectId(id)}
+            const wishlits = await wishlistsCollection.findOne(query)
+            res.send(wishlits)
+        })
 
 
+        // create-payment-intent
         //  STRIPE PAYMENT 
         app.post('/create-payment-intent', async (req, res) => {
             const booking = req.body;
-            const price = booking.reselPrice ;
+            const price = booking.price ;
             const amount = price * 100 ;
             
             const paymentIntent = await stripe.paymentIntents.create({
@@ -197,6 +221,21 @@ async function run() {
             res.send({
                 clientSecret: paymentIntent.client_secret,
             })
+        })
+
+        app.post('/paymentsinfo', async (req, res) => {
+            const payment = req.body 
+            const result = await paymentsCollection.insertOne(payment)
+            const id = payment.bookingId 
+            const filter = {_id:  ObjectId(id)}
+            const updateDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedResult = await bookingsCollection.updateOne(filter, updateDoc)
+            res.send(result)
         })
 
         
