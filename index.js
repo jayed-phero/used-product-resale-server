@@ -3,6 +3,7 @@ const cors = require('cors')
 const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
 const app = express()
 const port = process.env.PORT || 5000
@@ -134,7 +135,7 @@ async function run() {
         })
 
          // get all seller for admin 
-         app.get('/allseller', async (req, res) => {
+         app.get('/alluser', async (req, res) => {
             let query = {}
             const role = req.query.role
 
@@ -150,17 +151,55 @@ async function run() {
 
 
         // verify seller
-        app.put('/allproducts/:role', async (req, res) => {
-            const role = req.params.role
-            const product = req.body
-            const filter = { role: role }
+        app.put('/users/:verify', async (req, res) => {
+            const verify = req.params.verify
+            const seller = req.body
+            const filter = { verify: verify }
             const options = { upsert: true }
             const updateDoc = {
-                $set: product,
+                $set: seller,
             }
-            const result = await productsCollection.updateOne(filter, updateDoc, options)
+            const result = await usersCollection.updateOne(filter, updateDoc, options)
             res.send(result)
         })
+
+        // seller delete
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(filter)
+            res.send(result)
+        })
+
+        // get payment info
+        app.get('/bookings/:id', async (req, res) => {
+            const id = req.params.id 
+            const query = { _id: ObjectId(id)}
+            const booking = await bookingsCollection.findOne(query)
+            res.send(booking)
+        })
+
+
+
+        //  STRIPE PAYMENT 
+        app.post('/create-payment-intent', async (req, res) => {
+            const booking = req.body;
+            const price = booking.reselPrice ;
+            const amount = price * 100 ;
+            
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: amount,
+                "payment_method_types": [
+                    "card",
+                ]
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            })
+        })
+
+        
 
 
 
