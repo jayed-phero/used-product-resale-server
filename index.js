@@ -11,7 +11,10 @@ const port = process.env.PORT || 5000
 app.use(cors())
 app.use(express.json())
 
-const uri = process.env.DB_CONNECTION_LINK;
+
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.msatzvk.mongodb.net/?retryWrites=true&w=majority`;
+
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
@@ -97,9 +100,17 @@ async function run() {
         })
 
         // Get all wishlisted products
-        app.get('/wishlistedproducts', async (req, res) => {
-            const wishlitedpro = await wishlistsCollection.find().toArray()
-            res.send(wishlitedpro)
+        // app.get('/wishlistedproducts', async (req, res) => {
+        //     const wishlitedpro = await wishlistsCollection.find().toArray()
+        //     res.send(wishlitedpro)
+        // })
+
+        app.get('/wishlistedproducts/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { email: email }
+            const wishlistedproducts = await wishlistsCollection.find(query).toArray()
+            // console.log(user.role)
+            res.send(wishlistedproducts)
         })
 
         // get all bookings by cusotomer 
