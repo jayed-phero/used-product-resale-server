@@ -77,7 +77,7 @@ async function run() {
         app.get('/products/:categori_id', async (req, res) => {
             const id = req.params.categori_id
             const query = { categori_id: id }
-            const result = await productsCollection.find(query).toArray()
+            const result = await productsCollection.find(query).sort({$natural: -1}).toArray()
             res.send(result)
         })
 
@@ -165,6 +165,21 @@ async function run() {
             res.send(sellers)
         })
 
+        // get advertise product
+        app.get('/advertise', async (req, res) => {
+            let query = {}
+            const role = req.query.role
+
+            if (role) {
+                query = {
+                    role: role
+                }
+            }
+
+            const advertise = await productsCollection.find(query).toArray()
+            res.send(advertise)
+        })
+
 
         // verify seller
         app.put('/users/:verify', async (req, res) => {
@@ -177,6 +192,14 @@ async function run() {
             }
             const result = await usersCollection.updateOne(filter, updateDoc, options)
             res.send(result)
+        })
+
+        // check verify 
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email 
+            const query = {email: email}
+            const user  = await usersCollection.findOne(query)
+            res.send({isVerify: user?.verify === 'verified'})
         })
 
         // seller delete
@@ -208,7 +231,7 @@ async function run() {
         //  STRIPE PAYMENT 
         app.post('/create-payment-intent', async (req, res) => {
             const booking = req.body;
-            const price = booking.price ;
+            const price = booking.priceInt ;
             const amount = price * 100 ;
             
             const paymentIntent = await stripe.paymentIntents.create({
