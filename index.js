@@ -12,7 +12,6 @@ app.use(cors())
 app.use(express.json())
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.msatzvk.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -66,7 +65,6 @@ async function run() {
             const email = req.params.email
             const query = { email: email }
             const user = await usersCollection.findOne(query)
-            // console.log(user.role)
             res.send(user)
         })
 
@@ -99,17 +97,12 @@ async function run() {
             res.send(result)
         })
 
-        // Get all wishlisted products
-        // app.get('/wishlistedproducts', async (req, res) => {
-        //     const wishlitedpro = await wishlistsCollection.find().toArray()
-        //     res.send(wishlitedpro)
-        // })
 
+        // get user wishlist product by email
         app.get('/wishlistedproducts/:email', async (req, res) => {
             const email = req.params.email
             const query = { email: email }
             const wishlistedproducts = await wishlistsCollection.find(query).toArray()
-            // console.log(user.role)
             res.send(wishlistedproducts)
         })
 
@@ -297,12 +290,6 @@ app.listen(port, () => {
     console.log(`Resel product server is running ${port}`)
 })
 
-// echo "# b612-used-products-resale-server-side-jayed-phero" >> README.md
-// git init
-// git add README.md
-// git commit -m "first commit"
-// git branch -M main
-// git remote add origin https://github.com/programming-hero-web-course-4/b612-used-products-resale-server-side-jayed-phero.git
-// git push -u origin main
+
 
 
